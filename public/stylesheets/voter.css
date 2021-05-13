@@ -1,0 +1,46 @@
+
+@import url("common.css");
+
+
+/* selected candidates */
+.selected {
+    background-color: #c7d5f3;
+  }
+
+.party_div {
+    float: left;
+    text-align: center;
+    padding: 5px;
+    margin: 0px 0px 15px;
+    border-style: solid none none;
+    border-width: 1px medium medium;
+    border-top-color: #cccccc;
+    width: 246px;
+  }
+
+.position_div {
+    background: #eeeeee;
+    border-bottom: #fff 20px solid;
+    padding: 5px;
+  }
+
+.party_div h1 {
+    font-weight: bold;
+    font-size: 12px;
+  }
+
+.disabled {
+    background: #555555;
+  }
+
+.w23 {
+    max-width: 23%;
+  }
+
+.party_wrapper {
+    margin: 0 auto;
+  }
+
+.fixed_row_height tr {
+    height: 40px;
+  }

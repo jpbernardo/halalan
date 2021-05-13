@@ -1,0 +1,32 @@
+
+@import url("common.css");
+
+
+#content .content_center {
+    margin : 0px auto;
+    width : 400px;
+    text-align : center;
+  }
+
+
+#content .form_table {
+    width : 100%;
+    text-align : left;
+  }
+
+/* Widths */
+
+.w20 {
+    width: 20%;
+  }
+
+
+.w25 {
+    width: 25%;
+  }
+
+
+.w70 {
+    width: 70%;
+  }
+
