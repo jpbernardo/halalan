@@ -57,6 +57,7 @@ class Regenerate extends CI_Controller {
 		$error = array();
 		if (empty($error))
 		{
+            $this->load->model('abmin');
 			$password = random_string($this->settings['password_pin_characters'], $this->settings['password_length']);
 			$userpass = hash('sha256', $password);
             $userpass = strtoupper($userpass);
