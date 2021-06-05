@@ -33,8 +33,9 @@ class Regen extends CI_Model {
 		return $query->result_array();
 	}
 
-	function update($userpass, $id)
+	function update($salt, $userpass, $id)
 	{
+		$this->db->set('salt', $salt);
 		$this->db->set('password', $userpass);
 		$this->db->where(compact('id'));
 		$this->db->update('admins');

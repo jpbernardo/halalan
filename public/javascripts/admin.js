@@ -93,22 +93,19 @@ function fillPositionsAndParties() {
 }
 
 function changeElections() {
-	var url = window.location.href;
 	$.cookie('selected_election', $(this).val(), {path: '/'});
 	$.cookie('selected_position', '', {path: '/'});
-	window.location.href = url;
+	location.reload(); 
 }
 
 function changePositions() {
-	var url = window.location.href;
 	$.cookie('selected_position', $(this).val(), {path: '/'});
-	window.location.href = url;
+	location.reload(); 
 }
 
 function changeBlocks() {
-	var url = window.location.href;
 	$.cookie('selected_block', $(this).val(), {path: '/'});
-	window.location.href = url;
+	location.reload(); 
 }
 
 /* DOM is ready */

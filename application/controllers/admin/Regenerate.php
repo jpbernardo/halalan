@@ -61,12 +61,12 @@ class Regenerate extends CI_Controller {
 			$password = random_string($this->settings['password_pin_characters'], $this->settings['password_length']);
 			$userpass = hash('sha256', $password);
             $userpass = strtoupper($userpass);
-            $salt = $this->abmin->get_salt($user);
+            $salt = random_string("alnum",$this->settings['password_length']);
             $userpass = $salt.''.$userpass;
             $userpass = hash('sha256', $userpass);
             $userpass = strtoupper($userpass);
 			$this->load->model('regen');
-			$this->regen->update($userpass, $id);
+			$this->regen->update($salt, $userpass, $id);
 			$success = array();
 			$success[] = e('admin_regenerate_success');
 			if ($this->settings['password_pin_generation'] == 'web')
