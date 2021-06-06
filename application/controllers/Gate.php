@@ -356,7 +356,7 @@ class Gate extends CI_Controller {
 #endforeach;
 #$query = $this->db->query("SELECT b.id, b.block, e.election  FROM blocks b, elections e, blocks_elections_positions p WHERE b.id = p.block_id AND e.id = p.election_id ORDER BY e.election ASC");
 
-$query = $this->db->query("SELECT id, election FROM elections ORDER BY election ASC");
+$query = $this->db->query("SELECT id, election FROM elections ORDER BY election ASC")->escape();
 
 echo "<table border=2><tr>";
 echo "<th></th>";
@@ -370,7 +370,7 @@ echo "<th></th></tr><tr><td>Number of voters</td>";
 $tots = 0;
 foreach ($query->result() as $row): {
 	
-	$query2 = $this->db->query("SELECT COUNT(DISTINCT s.id) AS count FROM voters s, blocks_elections_positions p WHERE p.block_id = s.block_id AND p.election_id = $row->id AND p.election_id != 1");
+	$query2 = $this->db->query("SELECT COUNT(DISTINCT s.id) AS count FROM voters s, blocks_elections_positions p WHERE p.block_id = s.block_id AND p.election_id = $row->id AND p.election_id != 1")->escape();
 	$result = $query2->row_array();
 	$count = $result['count'];
 	echo "<td>$count</td>";
@@ -386,7 +386,7 @@ $tots = 0;
 
 foreach ($query->result() as $row): {
 	
-	$query3 = $this->db->query("SELECT COUNT(DISTINCT s.id) AS count FROM voters s, voted d, blocks_elections_positions p WHERE s.id = d.voter_id AND s.block_id = p.block_id AND p.election_id = $row->id AND p.election_id != 1");
+	$query3 = $this->db->query("SELECT COUNT(DISTINCT s.id) AS count FROM voters s, voted d, blocks_elections_positions p WHERE s.id = d.voter_id AND s.block_id = p.block_id AND p.election_id = $row->id AND p.election_id != 1")->escape();
 	$result = $query3->row_array();
 	$count = $result['count'];
 	echo "<td>$count</td>";

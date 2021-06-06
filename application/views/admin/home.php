@@ -71,7 +71,10 @@
 	</table>
 	<?php echo form_close(); ?>
 </div>
-
+<?php
+$uadmin = $this->session->userdata('admin');
+$u = $uadmin['electionid'];
+if($u == 1) {	?>
 <div class="content_right">
 	<h2>Reset Halalan Database</h2>
 	<?php #echo form_open('admin/home'); #/reset_db ?>
@@ -85,6 +88,9 @@
 	</table>
 	<?php echo form_close(); ?>
 </div>
+<?
+}
+?>
 
 <div style="clear:both;"></div>
 

@@ -204,6 +204,7 @@ $lang['halalan_admin_add_election_success'] = 'The election has been successfull
 $lang['halalan_admin_edit_election_running'] = 'An election which is running cannot be edited.';
 $lang['halalan_admin_edit_election_success'] = 'The election has been successfully edited.';
 $lang['halalan_admin_options_election_success'] = 'The election options has been successfully changed.';
+$lang['halalan_admin_options_election_restricted'] = 'You do not own the selected election.';
 
 // controllers/admin/blocks.php
 $lang['halalan_admin_blocks_title'] = 'Manage Blocks';

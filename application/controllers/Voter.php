@@ -265,83 +265,98 @@ class Voter extends CI_Controller {
 
 	function do_verify()
 	{
-		$error = array();
-		if ($this->settings['captcha'])
+		$this->load->library('form_validation');
+		if($this->settings['captcha'])
 		{
-			$captcha = $this->input->post('captcha');
-			if (empty($captcha))
-			{
-				$error[] = e('voter_confirm_vote_no_captcha');
-			}
-			else
-			{
-				// from CI doc
-				// First, delete old captchas
-				$expiration = time() - 1800; // 30-minute limit
-				$this->db->query('DELETE FROM captchas WHERE captcha_time < ' . $expiration);
-				// Then see if a captcha exists:
-				$sql = 'SELECT COUNT(*) AS count FROM captchas WHERE word = ? AND ip_address = ? AND captcha_time > ?';
-				$binds = array($captcha, $this->input->ip_address(), $expiration);
-				$query = $this->db->query($sql, $binds);
-				$row = $query->row();
-				if ($row->count == 0)
-				{
-					$error[] = e('voter_confirm_vote_not_captcha');
-				}
-			}
+			$this->form_validation->set_rules('captcha', 'Captcha', 'required|alpha_numeric|exact_length['.$this->settings["captcha_length"].']');	
 		}
-		if ($this->settings['pin'])
+
+		if ($this->form_validation->run() == FALSE)
 		{
-			$pin = $this->input->post('pin');
-			if (empty($pin))
-			{
-				$error[] = e('voter_confirm_vote_no_pin');
-			}
-			else
-			{
-				if (sha1($pin) != $this->voter['pin'])
-					$error[] = e('voter_confirm_vote_not_pin');
-			}
-		}
-		if (empty($error))
-		{
-			$voter_id = $this->voter['id'];
-			$timestamp = date("Y-m-d H:i:s");
-			$votes = $this->session->userdata('votes');
-			foreach ($votes as $election_id=>$positions)
-			{
-				foreach ($positions as $position_id=>$candidate_ids)
-				{
-					$abstain = FALSE;
-					foreach ($candidate_ids as $candidate_id)
-					{
-						if ($candidate_id == 'abstain')
-						{
-							$abstain = TRUE;
-						}
-						else
-						{
-							$this->Vote->insert(compact('candidate_id', 'voter_id', 'timestamp'));
-						}
-					}
-					if ($abstain)
-					{
-						$this->Abstain->insert(compact('election_id', 'position_id', 'voter_id', 'timestamp'));
-					}
-				}
-				$this->Voted->insert(compact('election_id', 'voter_id', 'timestamp'));
-			}
-			$this->session->unset_userdata('votes');
-			if ($this->settings['generate_image_trail'])
-			{
-				$this->_generate_image_trail($votes);
-			}
-			redirect('voter/logout');
+			$this->session->set_flashdata('messages', array('negative', e('voter_confirm_vote_not_captcha')));
+			redirect('voter/verify');
 		}
 		else
 		{
-			$this->session->set_flashdata('messages', array_merge(array('negative'), $error));
-			redirect('voter/verify');
+			$error = array();
+			if ($this->settings['captcha'])
+			{
+				$captcha = $this->input->post('captcha');
+
+				if (empty($captcha))
+				{
+					$error[] = e('voter_confirm_vote_no_captcha');
+				}
+				else
+				{
+					// from CI doc
+					// First, delete old captchas
+					$expiration = time() - 1800; // 30-minute limit
+					$this->db->query('DELETE FROM captchas WHERE captcha_time < ' . $expiration);
+					// Then see if a captcha exists:
+					$sql = 'SELECT COUNT(*) AS count FROM captchas WHERE word = ? AND ip_address = ? AND captcha_time > ?';
+					$binds = array($captcha, $this->input->ip_address(), $expiration);
+					$query = $this->db->query($sql, $binds);
+					$row = $query->row();
+					if ($row->count == 0)
+					{
+						$error[] = e('voter_confirm_vote_not_captcha');
+					}
+				}
+			}
+			if ($this->settings['pin'])
+			{
+				$pin = $this->input->post('pin');
+				if (empty($pin))
+				{
+					$error[] = e('voter_confirm_vote_no_pin');
+				}
+				else
+				{
+					if (sha1($pin) != $this->voter['pin'])
+						$error[] = e('voter_confirm_vote_not_pin');
+				}
+			}
+			if (empty($error))
+			{
+				$voter_id = $this->voter['id'];
+				$timestamp = date("Y-m-d H:i:s");
+				$votes = $this->session->userdata('votes');
+				foreach ($votes as $election_id=>$positions)
+				{
+					foreach ($positions as $position_id=>$candidate_ids)
+					{
+						$abstain = FALSE;
+						foreach ($candidate_ids as $candidate_id)
+						{
+							if ($candidate_id == 'abstain')
+							{
+								$abstain = TRUE;
+							}
+							else
+							{
+								$this->Vote->insert(compact('candidate_id', 'voter_id', 'timestamp'));
+							}
+						}
+						if ($abstain)
+						{
+							$this->Abstain->insert(compact('election_id', 'position_id', 'voter_id', 'timestamp'));
+						}
+					}
+					$this->Voted->insert(compact('election_id', 'voter_id', 'timestamp'));
+				}
+				$this->session->unset_userdata('votes');
+				if ($this->settings['generate_image_trail'])
+				{
+					$this->_generate_image_trail($votes);
+				}
+				redirect('voter/logout');
+			}
+			else
+			{
+				$this->session->set_flashdata('messages', array_merge(array('negative'), $error));
+				redirect('voter/verify');
+			}
 		}
 	}
 

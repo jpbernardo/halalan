@@ -61,7 +61,17 @@ class Elections extends CI_Controller {
 
 	function edit($id)
 	{
-		$this->_election('edit', $id);
+		$uadmin = $this->session->userdata('admin');
+		$u = $uadmin['electionid'];
+		if($u == 1 || $u == $id)
+		{
+			$this->_election('edit', $id);
+		}
+		else
+		{
+			$this->session->set_flashdata('messages', array('negative', e('admin_options_election_restricted')));
+			redirect('admin/elections');
+		}
 	}
 
 	function delete($id) 
@@ -93,30 +103,40 @@ class Elections extends CI_Controller {
 
 	function options($case, $id)
 	{
+		$uadmin = $this->session->userdata('admin');
+		$u = $uadmin['electionid'];
 		if ($case == 'status' || $case == 'results')
 		{
 			$election = $this->Election->select($id);
 			if ($election)
 			{
-				$data = array();
-				if ($case == 'status')
+				if($u==1 || $u == $id)
 				{
-					$data['status'] = ! $election['status'];
+					$data = array();
+					if ($case == 'status')
+					{
+						$data['status'] = ! $election['status'];
+					}
+					else
+					{
+						$data['results'] = ! $election['results'];
+					}
+					if ($election['parent_id'] == 0)
+					{
+						$children = $this->Election->select_all_children_by_parent_id($id);
+						foreach ($children as $child)
+						{
+							$this->Election->update($data, $child['id']);
+						}
+					}
+					$this->Election->update($data, $id);
+					$this->session->set_flashdata('messages', array('positive', e('admin_options_election_success')));
 				}
 				else
 				{
-					$data['results'] = ! $election['results'];
+					$this->session->set_flashdata('messages', array('negative', e('admin_options_election_restricted')));
 				}
-				if ($election['parent_id'] == 0)
-				{
-					$children = $this->Election->select_all_children_by_parent_id($id);
-					foreach ($children as $child)
-					{
-						$this->Election->update($data, $child['id']);
-					}
-				}
-				$this->Election->update($data, $id);
-				$this->session->set_flashdata('messages', array('positive', e('admin_options_election_success')));
+
 			}
 		}
 		if ($case == 'download')
