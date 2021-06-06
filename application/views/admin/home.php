@@ -88,7 +88,7 @@ if($u == 1) {	?>
 	</table>
 	<?php echo form_close(); ?>
 </div>
-<?
+<?php
 }
 ?>
 
