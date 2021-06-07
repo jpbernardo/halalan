@@ -166,7 +166,7 @@ class Voters extends CI_Controller {
 		if ($this->form_validation->run())
 		{
 			$voter['password'] = '';
-			$voter['block_id'] = $this->input->post('block_id', TRUE);
+			$voter['block_id'] = $this->security->xss_clean($this->input->post('block_id', TRUE));
 			$upload_data = $this->session->userdata('csv_upload_data');
 			$csv = array();
 			if ($handle = fopen($upload_data['full_path'], 'r'))

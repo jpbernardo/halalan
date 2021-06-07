@@ -295,7 +295,8 @@ class Voter extends CI_Controller {
 					$this->db->query('DELETE FROM captchas WHERE captcha_time < ' . $expiration);
 					// Then see if a captcha exists:
 					$sql = 'SELECT COUNT(*) AS count FROM captchas WHERE word = ? AND ip_address = ? AND captcha_time > ?';
-					$binds = array($captcha, $this->input->ip_address(), $expiration);
+                    $captchaip = $this->security->xss_clean($this->input->ip_address());
+					$binds = array($captcha, $captchaip, $expiration);
 					$query = $this->db->query($sql, $binds);
 					$row = $query->row();
 					if ($row->count == 0)
