@@ -271,17 +271,12 @@ class Voter extends CI_Controller {
 			$this->form_validation->set_rules('captcha', 'Captcha', 'required|alpha_numeric|exact_length['.$this->settings["captcha_length"].']');	
 		}
 
-		if ($this->form_validation->run() == FALSE)
-		{
-			$this->session->set_flashdata('messages', array('negative', e('voter_confirm_vote_not_captcha')));
-			redirect('voter/verify');
-		}
-		else
+		if ($this->form_validation->run())
 		{
 			$error = array();
 			if ($this->settings['captcha'])
 			{
-				$captcha = $this->input->post('captcha');
+				$captcha = $this->input->post('captcha', TRUE);
 
 				if (empty($captcha))
 				{
@@ -357,6 +352,10 @@ class Voter extends CI_Controller {
 				$this->session->set_flashdata('messages', array_merge(array('negative'), $error));
 				redirect('voter/verify');
 			}
+		}
+		else{
+			$this->session->set_flashdata('messages', array('negative', e('voter_confirm_vote_not_captcha')));
+			redirect('voter/verify');
 		}
 	}
 
