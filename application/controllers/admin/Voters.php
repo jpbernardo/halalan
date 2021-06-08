@@ -161,7 +161,7 @@ class Voters extends CI_Controller {
 
 	function import()
 	{
-		$this->form_validation->set_rules('block_id', e('admin_import_block'), 'required|callback__rule_running_election');
+		$this->form_validation->set_rules('block_id', e('admin_import_block'), 'required|is_natural_no_zero|callback__rule_running_election');
 		$this->form_validation->set_rules('csv', e('admin_import_csv'), 'callback__rule_csv');
 		if ($this->form_validation->run())
 		{
