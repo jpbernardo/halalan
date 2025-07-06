@@ -39,17 +39,10 @@ class Google_login_model extends CI_Model {
         {
             return false;
         }
-                         
-        
-    function Update_user_data($data, $id)
-    {
-        
-    }
-                         
+	}                        
 		
-	}
 
 }
 
-/* End of file abmin.php */
-/* Location: ./application/models/abmin.php */
+/* End of file Google_login_model.php */
+/* Location: ./application/models/Google_login_model.php */
