@@ -2,23 +2,30 @@
 
 # Google APIs Client Library for PHP #
 
+**NOTE**: please check to see if the package you'd like to install is available in our
+list of [Google cloud packages](https://cloud.google.com/php/docs/reference) first, as
+these are the recommended libraries.
+
 <dl>
-  <dt>Reference Docs</dt><dd><a href="https://googleapis.github.io/google-api-php-client/master/">https://googleapis.github.io/google-api-php-client/master/</a></dd>
+  <dt>Reference Docs</dt><dd><a href="https://googleapis.github.io/google-api-php-client/">https://googleapis.github.io/google-api-php-client/</a></dd>
   <dt>License</dt><dd>Apache 2.0</dd>
 </dl>
 
 The Google API Client Library enables you to work with Google APIs such as Gmail, Drive or YouTube on your server.
 
-These client libraries are officially supported by Google.  However, the libraries are considered complete and are in maintenance mode. This means that we will address critical bugs and security issues but will not add any new features.
-
-**NOTE** The actively maintained (v2) version of this client requires PHP 5.6 or above. If you require support for PHP 5.2 or 5.3, use the v1 branch.
+These client libraries are officially supported by Google. However, the libraries are considered complete and are in maintenance mode. This means that we will address critical bugs and security issues but will not add any new features.
 
 ## Google Cloud Platform
 
-For Google Cloud Platform APIs such as Datastore, Cloud Storage or Pub/Sub, we recommend using [GoogleCloudPlatform/google-cloud-php](https://github.com/googleapis/google-cloud-php) which is under active development.
+For Google Cloud Platform APIs such as [Datastore][cloud-datastore], [Cloud Storage][cloud-storage], [Pub/Sub][cloud-pubsub], and [Compute Engine][cloud-compute], we recommend using the Google Cloud client libraries. For a complete list of supported Google Cloud client libraries, see [googleapis/google-cloud-php](https://github.com/googleapis/google-cloud-php).
+
+[cloud-datastore]: https://github.com/googleapis/google-cloud-php-datastore
+[cloud-pubsub]: https://github.com/googleapis/google-cloud-php-pubsub
+[cloud-storage]: https://github.com/googleapis/google-cloud-php-storage
+[cloud-compute]: https://github.com/googleapis/google-cloud-php-compute
 
 ## Requirements ##
-* [PHP 5.6.0 or higher](https://www.php.net/)
+* [PHP 8.0 or higher](https://www.php.net/)
 
 ## Developer Documentation ##
 
@@ -37,7 +44,16 @@ composer installed.
 Once composer is installed, execute the following command in your project root to install this library:
 
 ```sh
-composer require google/apiclient:"^2.7"
+composer require google/apiclient
+```
+
+If you're facing a timeout error then either increase the timeout for composer by adding the env flag as `COMPOSER_PROCESS_TIMEOUT=600 composer install` or you can put this in the `config` section of the composer schema:
+```
+{
+    "config": {
+        "process-timeout": 600
+    }
+}
 ```
 
 Finally, be sure to include the autoloader:
@@ -58,10 +74,10 @@ you want to keep in `composer.json`:
 ```json
 {
     "require": {
-        "google/apiclient": "^2.7"
+        "google/apiclient": "^2.15.0"
     },
     "scripts": {
-        "post-update-cmd": "Google\\Task\\Composer::cleanup"
+        "pre-autoload-dump": "Google\\Task\\Composer::cleanup"
     },
     "extra": {
         "google/apiclient-services": [
@@ -76,7 +92,7 @@ This example will remove all services other than "Drive" and "YouTube" when
 `composer update` or a fresh `composer install` is run.
 
 **IMPORTANT**: If you add any services back in `composer.json`, you will need to
-remove the `vendor/google/apiclient-services` directory explicity for the
+remove the `vendor/google/apiclient-services` directory explicitly for the
 change you made to have effect:
 
 ```sh
@@ -135,12 +151,12 @@ $client = new Google\Client();
 $client->setApplicationName("Client_Library_Examples");
 $client->setDeveloperKey("YOUR_APP_KEY");
 
-$service = new Google_Service_Books($client);
-$optParams = array(
+$service = new Google\Service\Books($client);
+$query = 'Henry David Thoreau';
+$optParams = [
   'filter' => 'free-ebooks',
-  'q' => 'Henry David Thoreau'
-);
-$results = $service->volumes->listVolumes($optParams);
+];
+$results = $service->volumes->listVolumes($query, $optParams);
 
 foreach ($results->getItems() as $item) {
   echo $item['volumeInfo']['title'], "<br /> \n";
@@ -163,7 +179,7 @@ foreach ($results->getItems() as $item) {
 1. Set the scopes required for the API you are going to call
 
     ```php
-    $client->addScope(Google_Service_Drive::DRIVE);
+    $client->addScope(Google\Service\Drive::DRIVE);
     ```
 
 1. Set your application's redirect URI
@@ -210,7 +226,7 @@ calls return unexpected 401 or 403 errors.
 1. Set the scopes required for the API you are going to call
 
     ```php
-    $client->addScope(Google_Service_Drive::DRIVE);
+    $client->addScope(Google\Service\Drive::DRIVE);
     ```
 
 1. If you have delegated domain-wide access to the service account and you want to impersonate a user account, specify the email address of the user account using the method setSubject:
@@ -219,15 +235,29 @@ calls return unexpected 401 or 403 errors.
     $client->setSubject($user_to_impersonate);
     ```
 
+#### How to use a specific JSON key
+
+If you want to a specific JSON key instead of using `GOOGLE_APPLICATION_CREDENTIALS` environment variable, you can do this:
+
+```php
+$jsonKey = [
+   'type' => 'service_account',
+   // ...
+];
+$client = new Google\Client();
+$client->setAuthConfig($jsonKey);
+```
+
 ### Making Requests ###
 
 The classes used to call the API in [google-api-php-client-services](https://github.com/googleapis/google-api-php-client-services) are autogenerated. They map directly to the JSON requests and responses found in the [APIs Explorer](https://developers.google.com/apis-explorer/#p/).
 
 A JSON request to the [Datastore API](https://developers.google.com/apis-explorer/#p/datastore/v1beta3/datastore.projects.runQuery) would look like this:
 
-```json
+```
 POST https://datastore.googleapis.com/v1beta3/projects/YOUR_PROJECT_ID:runQuery?key=YOUR_API_KEY
-
+```
+```json
 {
     "query": {
         "kind": [{
@@ -248,10 +278,10 @@ Using this library, the same call would look something like this:
 
 ```php
 // create the datastore service class
-$datastore = new Google_Service_Datastore($client);
+$datastore = new Google\Service\Datastore($client);
 
 // build the query - this maps directly to the JSON
-$query = new Google_Service_Datastore_Query([
+$query = new Google\Service\Datastore\Query([
     'kind' => [
         [
             'name' => 'Book',
@@ -267,7 +297,7 @@ $query = new Google_Service_Datastore_Query([
 ]);
 
 // build the request and response
-$request = new Google_Service_Datastore_RunQueryRequest(['query' => $query]);
+$request = new Google\Service\Datastore\RunQueryRequest(['query' => $query]);
 $response = $datastore->projects->runQuery('YOUR_DATASET_ID', $request);
 ```
 
@@ -275,20 +305,20 @@ However, as each property of the JSON API has a corresponding generated class, t
 
 ```php
 // create the datastore service class
-$datastore = new Google_Service_Datastore($client);
+$datastore = new Google\Service\Datastore($client);
 
 // build the query
-$request = new Google_Service_Datastore_RunQueryRequest();
-$query = new Google_Service_Datastore_Query();
+$request = new Google\Service\Datastore_RunQueryRequest();
+$query = new Google\Service\Datastore\Query();
 //   - set the order
-$order = new Google_Service_Datastore_PropertyOrder();
+$order = new Google\Service\Datastore_PropertyOrder();
 $order->setDirection('descending');
-$property = new Google_Service_Datastore_PropertyReference();
+$property = new Google\Service\Datastore\PropertyReference();
 $property->setName('title');
 $order->setProperty($property);
 $query->setOrder([$order]);
 //   - set the kinds
-$kind = new Google_Service_Datastore_KindExpression();
+$kind = new Google\Service\Datastore\KindExpression();
 $kind->setName('Book');
 $query->setKinds([$kind]);
 //   - set the limit
@@ -319,7 +349,7 @@ $client = new Google\Client();
  * Application Default Credentials.
  */
 $client->useApplicationDefaultCredentials();
-$client->addScope(Google_Service_Plus::PLUS_ME);
+$client->addScope(Google\Service\Plus::PLUS_ME);
 
 // returns a Guzzle HTTP Client
 $httpClient = $client->authorize();
@@ -402,6 +432,28 @@ $client->setHttpClient($httpClient);
 
 Other Guzzle features such as [Handlers and Middleware](http://docs.guzzlephp.org/en/stable/handlers-and-middleware.html) offer even more control.
 
+### Partial Consent and Granted Scopes
+
+When using OAuth2 3LO (e.g. you're a client requesting credentials from a 3rd
+party, such as in the [simple file upload example](examples/simple-file-upload.php)),
+you may want to take advantage of Partial Consent.
+
+To allow clients to only grant certain scopes in the OAuth2 screen, pass the
+querystring parameter for `enable_serial_consent` when generating the
+authorization URL:
+
+```php
+$authUrl = $client->createAuthUrl($scope, ['enable_serial_consent' => 'true']);
+```
+
+Once the flow is completed, you can see which scopes were granted by calling
+`getGrantedScope` on the OAuth2 object:
+
+```php
+// Space-separated string of granted scopes if it exists, otherwise null.
+echo $client->getOAuth2Service()->getGrantedScope();
+```
+
 ### Service Specific Examples ###
 
 YouTube: https://github.com/youtube/api-samples/tree/master/php
@@ -422,15 +474,15 @@ If there is a specific bug with the library, please [file an issue](https://gith
 
 If X is a feature of the library, file away! If X is an example of using a specific service, the best place to go is to the teams for those specific APIs - our preference is to link to their examples rather than add them to the library, as they can then pin to specific versions of the library. If you have any examples for other APIs, let us know and we will happily add a link to the README above!
 
-### Why does Google_..._Service have weird names? ###
+### Why do some Google\Service classes have weird names? ###
 
-The _Service classes are generally automatically generated from the API discovery documents: https://developers.google.com/discovery/. Sometimes new features are added to APIs with unusual names, which can cause some unexpected or non-standard style naming in the PHP classes.
+The _Google\Service_ classes are generally automatically generated from the API discovery documents: https://developers.google.com/discovery/. Sometimes new features are added to APIs with unusual names, which can cause some unexpected or non-standard style naming in the PHP classes.
 
 ### How do I deal with non-JSON response types? ###
 
 Some services return XML or similar by default, rather than JSON, which is what the library supports. You can request a JSON response by adding an 'alt' argument to optional params that is normally the last argument to a method call:
 
-```
+```php
 $opt_params = array(
   'alt' => "json"
 );
@@ -438,7 +490,7 @@ $opt_params = array(
 
 ### How do I set a field to null? ###
 
-The library strips out nulls from the objects sent to the Google APIs as its the default value of all of the uninitialized properties. To work around this, set the field you want to null to `Google\Model::NULL_VALUE`. This is a placeholder that will be replaced with a true null when sent over the wire.
+The library strips out nulls from the objects sent to the Google APIs as it is the default value of all of the uninitialized properties. To work around this, set the field you want to null to `Google\Model::NULL_VALUE`. This is a placeholder that will be replaced with a true null when sent over the wire.
 
 ## Code Quality ##
 

@@ -5,8 +5,6 @@
  *
  * PHP version 5 and 7
  *
- * @category  Math
- * @package   BigInteger
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2017 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -15,15 +13,13 @@
 
 namespace phpseclib3\Math\BigInteger\Engines\BCMath\Reductions;
 
-use phpseclib3\Math\BigInteger\Engines\BCMath\Base;
 use phpseclib3\Math\BigInteger\Engines\BCMath;
+use phpseclib3\Math\BigInteger\Engines\BCMath\Base;
 
 /**
  * PHP Barrett Modular Exponentiation Engine
  *
- * @package PHP
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
 abstract class EvalBarrett extends Base
 {
@@ -59,15 +55,10 @@ abstract class EvalBarrett extends Base
      */
     protected static function generateCustomReduction(BCMath $m, $class)
     {
-        if (isset($n->reduce)) {
-            self::$custom_reduction = $n->reduce;
-            return $n->reduce;
-        }
-
         $m_length = strlen($m);
 
         if ($m_length < 5) {
-            $code = 'return bcmod($x, $n);';
+            $code = 'return self::BCMOD_THREE_PARAMS ? bcmod($x, $n, 0) : bcmod($x, $n);';
             eval('$func = function ($n) { ' . $code . '};');
             self::$custom_reduction = $func;
             return;
@@ -75,35 +66,35 @@ abstract class EvalBarrett extends Base
 
         $lhs = '1' . str_repeat('0', $m_length + ($m_length >> 1));
         $u = bcdiv($lhs, $m, 0);
-        $m1 = bcsub($lhs, bcmul($u, $m));
+        $m1 = bcsub($lhs, bcmul($u, $m, 0), 0);
 
         $cutoff = $m_length + ($m_length >> 1);
 
         $m = "'$m'";
         $u = "'$u'";
-        $m1= "'$m1'";
+        $m1 = "'$m1'";
 
-        $code.= '
+        $code = '
             $lsd = substr($n, -' . $cutoff . ');
             $msd = substr($n, 0, -' . $cutoff . ');
 
-            $temp = bcmul($msd, ' . $m1 . ');
-            $n = bcadd($lsd, $temp);
+            $temp = bcmul($msd, ' . $m1 . ', 0);
+            $n = bcadd($lsd, $temp, 0);
 
             $temp = substr($n, 0, ' . (-$m_length + 1) . ');
-            $temp = bcmul($temp, ' . $u . ');
+            $temp = bcmul($temp, ' . $u . ', 0);
             $temp = substr($temp, 0, ' . (-($m_length >> 1) - 1) . ');
-            $temp = bcmul($temp, ' . $m . ');
+            $temp = bcmul($temp, ' . $m . ', 0);
 
-            $result = bcsub($n, $temp);
+            $result = bcsub($n, $temp, 0);
 
             if ($result[0] == \'-\') {
                 $temp = \'1' . str_repeat('0', $m_length + 1) . '\';
-                $result = bcadd($result, $temp);
+                $result = bcadd($result, $temp, 0);
             }
 
             while (bccomp($result, ' . $m . ') >= 0) {
-                $result = bcsub($result, ' . $m . ');
+                $result = bcsub($result, ' . $m . ', 0);
             }
 
             return $result;';

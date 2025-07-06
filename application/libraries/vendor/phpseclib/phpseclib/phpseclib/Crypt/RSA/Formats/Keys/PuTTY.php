@@ -5,8 +5,6 @@
  *
  * PHP version 5
  *
- * @category  Crypt
- * @package   RSA
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2015 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -15,16 +13,14 @@
 
 namespace phpseclib3\Crypt\RSA\Formats\Keys;
 
-use phpseclib3\Math\BigInteger;
 use phpseclib3\Common\Functions\Strings;
 use phpseclib3\Crypt\Common\Formats\Keys\PuTTY as Progenitor;
+use phpseclib3\Math\BigInteger;
 
 /**
  * PuTTY Formatted RSA Key Handler
  *
- * @package RSA
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
 abstract class PuTTY extends Progenitor
 {
@@ -32,7 +28,6 @@ abstract class PuTTY extends Progenitor
      * Public Handler
      *
      * @var string
-     * @access private
      */
     const PUBLIC_HANDLER = 'phpseclib3\Crypt\RSA\Formats\Keys\OpenSSH';
 
@@ -40,14 +35,12 @@ abstract class PuTTY extends Progenitor
      * Algorithm Identifier
      *
      * @var array
-     * @access private
      */
     protected static $types = ['ssh-rsa'];
 
     /**
      * Break a public or private key down into its constituent components
      *
-     * @access public
      * @param string $key
      * @param string $password optional
      * @return array
@@ -63,7 +56,10 @@ abstract class PuTTY extends Progenitor
         if (!isset($components['private'])) {
             return $components;
         }
-        extract($components);
+        $type = $components['type'];
+        $comment = $components['comment'];
+        $public = $components['public'];
+        $private = $components['private'];
         unset($components['public'], $components['private']);
 
         $isPublicKey = false;
@@ -92,10 +88,9 @@ abstract class PuTTY extends Progenitor
     /**
      * Convert a private key to the appropriate format.
      *
-     * @access public
-     * @param \phpseclib3\Math\BigInteger $n
-     * @param \phpseclib3\Math\BigInteger $e
-     * @param \phpseclib3\Math\BigInteger $d
+     * @param BigInteger $n
+     * @param BigInteger $e
+     * @param BigInteger $d
      * @param array $primes
      * @param array $exponents
      * @param array $coefficients
@@ -118,9 +113,8 @@ abstract class PuTTY extends Progenitor
     /**
      * Convert a public key to the appropriate format
      *
-     * @access public
-     * @param \phpseclib3\Math\BigInteger $n
-     * @param \phpseclib3\Math\BigInteger $e
+     * @param BigInteger $n
+     * @param BigInteger $e
      * @return string
      */
     public static function savePublicKey(BigInteger $n, BigInteger $e)

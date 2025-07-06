@@ -7,8 +7,6 @@
  *
  * Reads and creates arrays as DSA keys
  *
- * @category  Crypt
- * @package   DSA
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2015 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -22,16 +20,13 @@ use phpseclib3\Math\BigInteger;
 /**
  * Raw DSA Key Handler
  *
- * @package DSA
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
 abstract class Raw
 {
     /**
      * Break a public or private key down into its constituent components
      *
-     * @access public
      * @param array $key
      * @param string $password optional
      * @return array
@@ -61,12 +56,11 @@ abstract class Raw
     /**
      * Convert a private key to the appropriate format.
      *
-     * @access public
-     * @param \phpseclib3\Math\BigInteger $p
-     * @param \phpseclib3\Math\BigInteger $q
-     * @param \phpseclib3\Math\BigInteger $g
-     * @param \phpseclib3\Math\BigInteger $y
-     * @param \phpseclib3\Math\BigInteger $x
+     * @param BigInteger $p
+     * @param BigInteger $q
+     * @param BigInteger $g
+     * @param BigInteger $y
+     * @param BigInteger $x
      * @param string $password optional
      * @return string
      */
@@ -78,11 +72,10 @@ abstract class Raw
     /**
      * Convert a public key to the appropriate format
      *
-     * @access public
-     * @param \phpseclib3\Math\BigInteger $p
-     * @param \phpseclib3\Math\BigInteger $q
-     * @param \phpseclib3\Math\BigInteger $g
-     * @param \phpseclib3\Math\BigInteger $y
+     * @param BigInteger $p
+     * @param BigInteger $q
+     * @param BigInteger $g
+     * @param BigInteger $y
      * @return string
      */
     public static function savePublicKey(BigInteger $p, BigInteger $q, BigInteger $g, BigInteger $y)

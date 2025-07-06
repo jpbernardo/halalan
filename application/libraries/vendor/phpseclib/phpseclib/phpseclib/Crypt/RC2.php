@@ -26,8 +26,6 @@
  * ?>
  * </code>
  *
- * @category Crypt
- * @package  RC2
  * @author   Patrick Monnerat <pm@datasphere.ch>
  * @license  http://www.opensource.org/licenses/mit-license.html  MIT License
  * @link     http://phpseclib.sourceforge.net
@@ -41,75 +39,58 @@ use phpseclib3\Exception\BadModeException;
 /**
  * Pure-PHP implementation of RC2.
  *
- * @package RC2
- * @access  public
  */
 class RC2 extends BlockCipher
 {
     /**
      * Block Length of the cipher
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::block_size
+     * @see Common\SymmetricKey::block_size
      * @var int
-     * @access private
      */
     protected $block_size = 8;
 
     /**
      * The Key
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::key
+     * @see Common\SymmetricKey::key
      * @see self::setKey()
      * @var string
-     * @access private
      */
     protected $key;
 
     /**
      * The Original (unpadded) Key
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::key
+     * @see Common\SymmetricKey::key
      * @see self::setKey()
      * @see self::encrypt()
      * @see self::decrypt()
      * @var string
-     * @access private
      */
     private $orig_key;
-
-    /**
-     * Don't truncate / null pad key
-     *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::clearBuffers()
-     * @var bool
-     * @access private
-     */
-    private $skip_key_adjustment = true;
 
     /**
      * Key Length (in bytes)
      *
      * @see \phpseclib3\Crypt\RC2::setKeyLength()
      * @var int
-     * @access private
      */
     protected $key_length = 16; // = 128 bits
 
     /**
      * The mcrypt specific name of the cipher
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::cipher_name_mcrypt
+     * @see Common\SymmetricKey::cipher_name_mcrypt
      * @var string
-     * @access private
      */
     protected $cipher_name_mcrypt = 'rc2';
 
     /**
      * Optimizing value while CFB-encrypting
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::cfb_init_len
+     * @see Common\SymmetricKey::cfb_init_len
      * @var int
-     * @access private
      */
     protected $cfb_init_len = 500;
 
@@ -123,7 +104,6 @@ class RC2 extends BlockCipher
      * @see self::setKeyLength()
      * @see self::setKey()
      * @var int
-     * @access private
      */
     private $default_key_length = 1024;
 
@@ -135,7 +115,6 @@ class RC2 extends BlockCipher
      * @see self::isValidEnine()
      * @see self::setKey()
      * @var int
-     * @access private
      */
     private $current_key_length;
 
@@ -144,7 +123,6 @@ class RC2 extends BlockCipher
      *
      * @see self::setupKey()
      * @var array
-     * @access private
      */
     private $keys;
 
@@ -154,7 +132,6 @@ class RC2 extends BlockCipher
      *
      * @see self::setKey()
      * @var array
-     * @access private
      */
     private static $pitable = [
         0xD9, 0x78, 0xF9, 0xC4, 0x19, 0xDD, 0xB5, 0xED,
@@ -228,7 +205,6 @@ class RC2 extends BlockCipher
      *
      * @see self::setKey()
      * @var array
-     * @access private
      */
     private static $invpitable = [
         0xD1, 0xDA, 0xB9, 0x6F, 0x9C, 0xC8, 0x78, 0x66,
@@ -269,7 +245,6 @@ class RC2 extends BlockCipher
      * Default Constructor.
      *
      * @param string $mode
-     * @access public
      * @throws \InvalidArgumentException if an invalid / unsupported mode is provided
      */
     public function __construct($mode)
@@ -286,9 +261,8 @@ class RC2 extends BlockCipher
      *
      * This is mainly just a wrapper to set things up for \phpseclib3\Crypt\Common\SymmetricKey::isValidEngine()
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::__construct()
+     * @see Common\SymmetricKey::__construct()
      * @param int $engine
-     * @access protected
      * @return bool
      */
     protected function isValidEngineHelper($engine)
@@ -296,6 +270,12 @@ class RC2 extends BlockCipher
         switch ($engine) {
             case self::ENGINE_OPENSSL:
                 if ($this->current_key_length != 128 || strlen($this->orig_key) < 16) {
+                    return false;
+                }
+                // quoting https://www.openssl.org/news/openssl-3.0-notes.html, OpenSSL 3.0.1
+                // "Moved all variations of the EVP ciphers CAST5, BF, IDEA, SEED, RC2, RC4, RC5, and DES to the legacy provider"
+                // in theory openssl_get_cipher_methods() should catch this but, on GitHub Actions, at least, it does not
+                if (defined('OPENSSL_VERSION_TEXT') && version_compare(preg_replace('#OpenSSL (\d+\.\d+\.\d+) .*#', '$1', OPENSSL_VERSION_TEXT), '3.0.1', '>=')) {
                     return false;
                 }
                 $this->cipher_name_openssl_ecb = 'rc2-ecb';
@@ -312,7 +292,6 @@ class RC2 extends BlockCipher
      * Calling this function after setting the key has no effect until the next
      *  \phpseclib3\Crypt\RC2::setKey() call.
      *
-     * @access public
      * @param int $length in bits
      * @throws \LengthException if the key length isn't supported
      */
@@ -329,7 +308,6 @@ class RC2 extends BlockCipher
     /**
      * Returns the current key length
      *
-     * @access public
      * @return int
      */
     public function getKeyLength()
@@ -345,8 +323,7 @@ class RC2 extends BlockCipher
      * has more then 128 bytes in it, and set $key to a single null byte if
      * it is empty.
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::setKey()
-     * @access public
+     * @see Common\SymmetricKey::setKey()
      * @param string $key
      * @param int|boolean $t1 optional Effective key length in bits.
      * @throws \LengthException if the key length isn't supported
@@ -408,7 +385,6 @@ class RC2 extends BlockCipher
      * Mostly a wrapper for \phpseclib3\Crypt\Common\SymmetricKey::encrypt, with some additional OpenSSL handling code
      *
      * @see self::decrypt()
-     * @access public
      * @param string $plaintext
      * @return string $ciphertext
      */
@@ -431,7 +407,6 @@ class RC2 extends BlockCipher
      * Mostly a wrapper for \phpseclib3\Crypt\Common\SymmetricKey::decrypt, with some additional OpenSSL handling code
      *
      * @see self::encrypt()
-     * @access public
      * @param string $ciphertext
      * @return string $plaintext
      */
@@ -451,9 +426,8 @@ class RC2 extends BlockCipher
     /**
      * Encrypts a block
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::encryptBlock()
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::encrypt()
-     * @access private
+     * @see Common\SymmetricKey::encryptBlock()
+     * @see Common\SymmetricKey::encrypt()
      * @param string $in
      * @return string
      */
@@ -496,9 +470,8 @@ class RC2 extends BlockCipher
     /**
      * Decrypts a block
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::decryptBlock()
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::decrypt()
-     * @access private
+     * @see Common\SymmetricKey::decryptBlock()
+     * @see Common\SymmetricKey::decrypt()
      * @param string $in
      * @return string
      */
@@ -541,8 +514,7 @@ class RC2 extends BlockCipher
     /**
      * Creates the key schedule
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::setupKey()
-     * @access private
+     * @see Common\SymmetricKey::setupKey()
      */
     protected function setupKey()
     {
@@ -562,8 +534,7 @@ class RC2 extends BlockCipher
     /**
      * Setup the performance-optimized function for de/encrypt()
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::setupInlineCrypt()
-     * @access private
+     * @see Common\SymmetricKey::setupInlineCrypt()
      */
     protected function setupInlineCrypt()
     {
@@ -615,7 +586,7 @@ class RC2 extends BlockCipher
                     $r3 += $keys[$r2 & 0x3F];';
                 $limit = $actions[$limit];
             }
-         }
+        }
 
         $encrypt_block .= '$in = pack("v4", $r0, $r1, $r2, $r3);';
 
