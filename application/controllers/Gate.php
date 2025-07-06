@@ -120,7 +120,7 @@ class Gate extends CI_Controller {
         
         if ($voter = $this->Boter->authenticated($email))
 		{
-			if (strtotime($voter['login']) > strtotime($voter['logout']))
+			if (strtotime($voter['login'] ?? '') > strtotime($voter['logout'] ?? ''))
 			{
 				$messages = array('negative', e('gate_voter_currently_logged_in'));
 				$this->session->set_flashdata('messages', $messages);
