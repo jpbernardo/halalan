@@ -2,8 +2,12 @@
 declare(strict_types=1);
 namespace ParagonIE\ConstantTime;
 
+use InvalidArgumentException;
+use RangeException;
+use TypeError;
+
 /**
- *  Copyright (c) 2016 - 2018 Paragon Initiative Enterprises.
+ *  Copyright (c) 2016 - 2022 Paragon Initiative Enterprises.
  *  Copyright (c) 2014 Steve "Sc00bz" Thomas (steve at tobtu dot com)
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -38,13 +42,16 @@ abstract class Base64 implements EncoderInterface
      *
      * Base64 character set "[A-Z][a-z][0-9]+/"
      *
-     * @param string $src
+     * @param string $binString
      * @return string
-     * @throws \TypeError
+     *
+     * @throws TypeError
      */
-    public static function encode(string $src): string
-    {
-        return static::doEncode($src, true);
+    public static function encode(
+        #[\SensitiveParameter]
+        string $binString
+    ): string {
+        return static::doEncode($binString, true);
     }
 
     /**
@@ -54,10 +61,13 @@ abstract class Base64 implements EncoderInterface
      *
      * @param string $src
      * @return string
-     * @throws \TypeError
+     *
+     * @throws TypeError
      */
-    public static function encodeUnpadded(string $src): string
-    {
+    public static function encodeUnpadded(
+        #[\SensitiveParameter]
+        string $src
+    ): string {
         return static::doEncode($src, false);
     }
 
@@ -65,10 +75,14 @@ abstract class Base64 implements EncoderInterface
      * @param string $src
      * @param bool $pad   Include = padding?
      * @return string
-     * @throws \TypeError
+     *
+     * @throws TypeError
      */
-    protected static function doEncode(string $src, bool $pad = true): string
-    {
+    protected static function doEncode(
+        #[\SensitiveParameter]
+        string $src,
+        bool $pad = true
+    ): string {
         $dest = '';
         $srcLen = Binary::safeStrlen($src);
         // Main loop (no padding):
@@ -119,12 +133,15 @@ abstract class Base64 implements EncoderInterface
      * @param string $encodedString
      * @param bool $strictPadding
      * @return string
-     * @throws \RangeException
-     * @throws \TypeError
-     * @psalm-suppress RedundantCondition
+     *
+     * @throws RangeException
+     * @throws TypeError
      */
-    public static function decode(string $encodedString, bool $strictPadding = false): string
-    {
+    public static function decode(
+        #[\SensitiveParameter]
+        string $encodedString,
+        bool $strictPadding = false
+    ): string {
         // Remove padding
         $srcLen = Binary::safeStrlen($encodedString);
         if ($srcLen === 0) {
@@ -141,12 +158,12 @@ abstract class Base64 implements EncoderInterface
                 }
             }
             if (($srcLen & 3) === 1) {
-                throw new \RangeException(
+                throw new RangeException(
                     'Incorrect padding'
                 );
             }
             if ($encodedString[$srcLen - 1] === '=') {
-                throw new \RangeException(
+                throw new RangeException(
                     'Incorrect padding'
                 );
             }
@@ -189,6 +206,9 @@ abstract class Base64 implements EncoderInterface
                     ((($c1 << 4) | ($c2 >> 2)) & 0xff)
                 );
                 $err |= ($c0 | $c1 | $c2) >> 8;
+                if ($strictPadding) {
+                    $err |= ($c2 << 6) & 0xff;
+                }
             } elseif ($i + 1 < $srcLen) {
                 $c1 = static::decode6Bits($chunk[2]);
                 $dest .= \pack(
@@ -196,18 +216,46 @@ abstract class Base64 implements EncoderInterface
                     ((($c0 << 2) | ($c1 >> 4)) & 0xff)
                 );
                 $err |= ($c0 | $c1) >> 8;
-            } elseif ($i < $srcLen && $strictPadding) {
+                if ($strictPadding) {
+                    $err |= ($c1 << 4) & 0xff;
+                }
+            } elseif ($strictPadding) {
                 $err |= 1;
             }
         }
-        /** @var bool $check */
         $check = ($err === 0);
         if (!$check) {
-            throw new \RangeException(
+            throw new RangeException(
                 'Base64::decode() only expects characters in the correct base64 alphabet'
             );
         }
         return $dest;
+    }
+
+    /**
+     * @param string $encodedString
+     * @return string
+     */
+    public static function decodeNoPadding(
+        #[\SensitiveParameter]
+        string $encodedString
+    ): string {
+        $srcLen = Binary::safeStrlen($encodedString);
+        if ($srcLen === 0) {
+            return '';
+        }
+        if (($srcLen & 3) === 0) {
+            // If $strLen is not zero, and it is divisible by 4, then it's at least 4.
+            if ($encodedString[$srcLen - 1] === '=' || $encodedString[$srcLen - 2] === '=') {
+                throw new InvalidArgumentException(
+                    "decodeNoPadding() doesn't tolerate padding"
+                );
+            }
+        }
+        return static::decode(
+            $encodedString,
+            true
+        );
     }
 
     /**

@@ -5,8 +5,6 @@
  *
  * PHP version 5 and 7
  *
- * @category  Math
- * @package   BigInteger
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2017 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -20,9 +18,7 @@ use phpseclib3\Math\BigInteger\Engines\BCMath;
 /**
  * Sliding Window Exponentiation Engine
  *
- * @package PHP
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
 abstract class Base extends BCMath
 {
@@ -31,13 +27,11 @@ abstract class Base extends BCMath
      *
      * $cache[self::VARIABLE] tells us whether or not the cached data is still valid.
      *
-     * @access private
      */
     const VARIABLE = 0;
     /**
      * $cache[self::DATA] contains the cached data.
      *
-     * @access private
      */
     const DATA = 1;
 
@@ -54,11 +48,11 @@ abstract class Base extends BCMath
     /**
      * Performs modular exponentiation.
      *
-     * @param \phpseclib3\Math\BigInteger\Engines\BCMath $x
-     * @param \phpseclib3\Math\BigInteger\Engines\BCMath $e
-     * @param \phpseclib3\Math\BigInteger\Engines\BCMath $n
+     * @param BCMath $x
+     * @param BCMath $e
+     * @param BCMath $n
      * @param string $class
-     * @return \phpseclib3\Math\BigInteger\Engines\BCMath
+     * @return BCMath
      */
     protected static function powModHelper(BCMath $x, BCMath $e, BCMath $n, $class)
     {
@@ -97,7 +91,7 @@ abstract class Base extends BCMath
      */
     protected static function multiplyReduce($x, $y, $n, $class)
     {
-        return static::reduce(bcmul($x, $y), $n);
+        return static::reduce(bcmul($x, $y, 0), $n);
     }
 
     /**
@@ -111,6 +105,6 @@ abstract class Base extends BCMath
      */
     protected static function squareReduce($x, $n, $class)
     {
-        return static::reduce(bcmul($x, $x), $n);
+        return static::reduce(bcmul($x, $x, 0), $n);
     }
 }

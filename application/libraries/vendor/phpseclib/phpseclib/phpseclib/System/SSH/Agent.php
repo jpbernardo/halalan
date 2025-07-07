@@ -24,8 +24,6 @@
  * ?>
  * </code>
  *
- * @category  System
- * @package   SSH\Agent
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2014 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -34,20 +32,20 @@
 
 namespace phpseclib3\System\SSH;
 
+use phpseclib3\Common\Functions\Strings;
+use phpseclib3\Crypt\Common\PublicKey;
+use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\Crypt\RSA;
 use phpseclib3\Exception\BadConfigurationException;
+use phpseclib3\Net\SSH2;
 use phpseclib3\System\SSH\Agent\Identity;
-use phpseclib3\Common\Functions\Strings;
-use phpseclib3\Crypt\PublicKeyLoader;
 
 /**
  * Pure-PHP ssh-agent client identity factory
  *
  * requestIdentities() method pumps out \phpseclib3\System\SSH\Agent\Identity objects
  *
- * @package SSH\Agent
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
 class Agent
 {
@@ -82,7 +80,6 @@ class Agent
      * Socket Resource
      *
      * @var resource
-     * @access private
      */
     private $fsock;
 
@@ -90,7 +87,6 @@ class Agent
      * Agent forwarding status
      *
      * @var int
-     * @access private
      */
     private $forward_status = self::FORWARD_NONE;
 
@@ -100,7 +96,6 @@ class Agent
      * for agent unix socket
      *
      * @var string
-     * @access private
      */
     private $socket_buffer = '';
 
@@ -110,25 +105,15 @@ class Agent
      * channel
      *
      * @var int
-     * @access private
      */
     private $expected_bytes = 0;
 
     /**
-     * The current request channel
-     *
-     * @var int
-     * @access private
-     */
-    private $request_channel;
-
-    /**
      * Default Constructor
      *
-     * @return \phpseclib3\System\SSH\Agent
-     * @throws \phpseclib3\Exception\BadConfigurationException if SSH_AUTH_SOCK cannot be found
+     * @return Agent
+     * @throws BadConfigurationException if SSH_AUTH_SOCK cannot be found
      * @throws \RuntimeException on connection errors
-     * @access public
      */
     public function __construct($address = null)
     {
@@ -145,9 +130,20 @@ class Agent
             }
         }
 
-        $this->fsock = fsockopen('unix://' . $address, 0, $errno, $errstr);
-        if (!$this->fsock) {
-            throw new \RuntimeException("Unable to connect to ssh-agent (Error $errno: $errstr)");
+        if (in_array('unix', stream_get_transports())) {
+            $this->fsock = fsockopen('unix://' . $address, 0, $errno, $errstr);
+            if (!$this->fsock) {
+                throw new \RuntimeException("Unable to connect to ssh-agent (Error $errno: $errstr)");
+            }
+        } else {
+            if (substr($address, 0, 9) != '\\\\.\\pipe\\' || strpos(substr($address, 9), '\\') !== false) {
+                throw new \RuntimeException('Address is not formatted as a named pipe should be');
+            }
+
+            $this->fsock = fopen($address, 'r+b');
+            if (!$this->fsock) {
+                throw new \RuntimeException('Unable to open address');
+            }
         }
     }
 
@@ -159,7 +155,6 @@ class Agent
      *
      * @return array
      * @throws \RuntimeException on receipt of unexpected packets
-     * @access public
      */
     public function requestIdentities()
     {
@@ -192,13 +187,14 @@ class Agent
                 case 'ecdsa-sha2-nistp256':
                 case 'ecdsa-sha2-nistp384':
                 case 'ecdsa-sha2-nistp521':
-		    $key = PublicKeyLoader::load($key_type . ' ' . base64_encode($key_blob));
+                    $key = PublicKeyLoader::load($key_type . ' ' . base64_encode($key_blob));
             }
             // resources are passed by reference by default
             if (isset($key)) {
                 $identity = (new Identity($this->fsock))
                     ->withPublicKey($key)
-                    ->withPublicKeyBlob($key_blob);
+                    ->withPublicKeyBlob($key_blob)
+                    ->withComment($comment);
                 $identities[] = $identity;
                 unset($key);
             }
@@ -208,14 +204,30 @@ class Agent
     }
 
     /**
+     * Returns the SSH Agent identity matching a given public key or null if no identity is found
+     *
+     * @return ?Identity
+     */
+    public function findIdentityByPublicKey(PublicKey $key)
+    {
+        $identities = $this->requestIdentities();
+        $key = (string) $key;
+        foreach ($identities as $identity) {
+            if (((string) $identity->getPublicKey()) == $key) {
+                return $identity;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Signal that agent forwarding should
      * be requested when a channel is opened
      *
-     * @param \phpseclib3\Net\SSH2 $ssh
-     * @return bool
-     * @access public
+     * @return void
      */
-    public function startSSHForwarding($ssh)
+    public function startSSHForwarding()
     {
         if ($this->forward_status == self::FORWARD_NONE) {
             $this->forward_status = self::FORWARD_REQUEST;
@@ -225,11 +237,10 @@ class Agent
     /**
      * Request agent forwarding of remote server
      *
-     * @param \phpseclib3\Net\SSH2 $ssh
+     * @param SSH2 $ssh
      * @return bool
-     * @access private
      */
-    private function request_forwarding($ssh)
+    private function request_forwarding(SSH2 $ssh)
     {
         if (!$ssh->requestAgentForwarding()) {
             return false;
@@ -247,10 +258,9 @@ class Agent
      * open to give the SSH Agent an opportunity
      * to take further action. i.e. request agent forwarding
      *
-     * @param \phpseclib3\Net\SSH2 $ssh
-     * @access private
+     * @param SSH2 $ssh
      */
-    public function registerChannelOpen($ssh)
+    public function registerChannelOpen(SSH2 $ssh)
     {
         if ($this->forward_status == self::FORWARD_REQUEST) {
             $this->request_forwarding($ssh);
@@ -263,12 +273,11 @@ class Agent
      * @param string $data
      * @return string Data from SSH Agent
      * @throws \RuntimeException on connection errors
-     * @access public
      */
     public function forwardData($data)
     {
         if ($this->expected_bytes > 0) {
-            $this->socket_buffer.= $data;
+            $this->socket_buffer .= $data;
             $this->expected_bytes -= strlen($data);
         } else {
             $agent_data_bytes = current(unpack('N', $data));
