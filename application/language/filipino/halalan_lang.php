@@ -30,7 +30,7 @@ $lang['halalan_gate_statistics_title'] = 'Statistics';
 
 // views/gate/voter.php
 $lang['halalan_gate_voter_login_label'] = 'LOGIN';
-$lang['halalan_gate_voter_username'] = 'Student Number';
+$lang['halalan_gate_voter_username'] = 'Username';
 $lang['halalan_gate_voter_password'] = 'Password';
 $lang['halalan_gate_voter_login_button'] = 'Login';
 $lang['halalan_gate_voter_not_running'] = 'Hindi pa nagsisimula ang eleksyon. Hintaying simulan ito ng tagapamahala ng eleksyon.';

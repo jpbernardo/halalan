@@ -34,7 +34,7 @@ $lang['halalan_gate_ballots_title'] = 'Ballots';
 
 // views/gate/voter.php
 $lang['halalan_gate_voter_login_label'] = 'LOGIN';
-$lang['halalan_gate_voter_username'] = 'Student Number';
+$lang['halalan_gate_voter_username'] = 'Username';
 $lang['halalan_gate_voter_password'] = 'Password';
 $lang['halalan_gate_voter_login_button'] = 'Login';
 $lang['halalan_gate_voter_not_running'] = 'The election is not running. Please wait for the election administrator to activate the election.';
