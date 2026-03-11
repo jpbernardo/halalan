@@ -54,7 +54,8 @@ class Position extends CI_Model {
 		$this->db->from('positions');
 		$this->db->where(compact('id'));
 		$query = $this->db->get();
-		return $query->row()->position;
+		$row = $query->row();
+		return $row ? $row->position : null;
 	}
 
 	function select_all_by_ids($ids)

@@ -49,7 +49,8 @@ class Logs_model extends CI_Model {
         if($result->num_rows()==0){
             return 0;
         } else {
-            return $result->row()->id;
+            $row = $result->row();
+            return $row ? $row->id : 0;
         }
     }
     

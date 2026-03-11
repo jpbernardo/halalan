@@ -137,7 +137,8 @@ class Block extends CI_Model {
         if($result->num_rows()==0){
             return 0;
         } else {
-            return $result->row()->election_id;
+            $row = $result->row();
+            return $row ? $row->election_id : 0;
         }
     }
 

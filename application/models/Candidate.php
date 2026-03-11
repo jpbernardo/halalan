@@ -54,7 +54,8 @@ class Candidate extends CI_Model {
 		$this->db->where(compact('id'));
 		$this->db->from('candidates');
 		$query = $this->db->get();
-		return $query->row()->first_name . " " . $query->row()->last_name;
+		$row = $query->row();
+		return $row ? ($row->first_name . " " . $row->last_name) : null;
 	}
 
 	function select_all_by_election_id_and_position_id($election_id, $position_id)
@@ -121,7 +122,10 @@ class Candidate extends CI_Model {
 			$this->db->from('parties');
 			$this->db->where('id', $result['party_id']);
 			$query = $this->db->get();
-			$parties[] = $query->row_array();
+			$party = $query->row_array();
+			if ($party) {
+				$parties[] = $party;
+			}
 		}
 		return $parties;
 	}

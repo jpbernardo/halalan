@@ -59,7 +59,8 @@ class Abmin extends CI_Model {
         $this->db->select('salt');
         $this->db->from('admins');
         $this->db->where('username',$username);
-        return $this->db->get()->row()->salt;
+        $row = $this->db->get()->row();
+        return $row ? $row->salt : null;
 
     }
     
