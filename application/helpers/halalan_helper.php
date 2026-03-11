@@ -61,7 +61,7 @@ function display_messages($validation, $custom)
 	}
 	else if (!empty($custom))
 	{
-		if ($custom[0] == 'positive')
+		if (isset($custom[0]) && $custom[0] == 'positive')
 		{
 			$return .= '<div class="positive"><ul>';
 		}
@@ -91,7 +91,10 @@ function for_dropdown($array, $key, $value, $blank = TRUE)
 	$tmp = array();
 	foreach ($array as $a)
 	{
-		$tmp[$a[$key]] = $a[$value];
+		if (isset($a[$key]) && isset($a[$value]))
+		{
+			$tmp[$a[$key]] = $a[$value];
+		}
 	}
 	if ($blank)
 	{
@@ -109,12 +112,12 @@ function for_dropdown($array, $key, $value, $blank = TRUE)
  */
 function candidate_name($candidate)
 {
-	$name = $candidate['first_name'];
-	if ( ! empty($candidate['alias']))
+	$name = isset($candidate['first_name']) ? $candidate['first_name'] : '';
+	if (isset($candidate['alias']) && ! empty($candidate['alias']))
 	{
 		$name .= ' &quot;' . $candidate['alias'] . '&quot;';
 	}
-	$name .= ' ' . $candidate['last_name'];
+	$name .= ' ' . (isset($candidate['last_name']) ? $candidate['last_name'] : '');
 	return $name;
 }
 
