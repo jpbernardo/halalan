@@ -11,7 +11,7 @@ $lang['halalan_common_action'] = 'Aksyon';
 
 // controllers/gate.php
 // common to voter_login and admin_login
-$lang['halalan_gate_common_login_failure'] = 'Hindi matagumpay na pagpasok.';
+$lang['halalan_gate_common_login_failure'] = 'Hindi matagumpay ang pag-login.';
 // index
 // voter
 $lang['halalan_gate_voter_title'] = 'Voter Login';
@@ -27,6 +27,8 @@ $lang['halalan_gate_result_title'] = 'Resulta';
 $lang['halalan_gate_result_unavailable'] = 'Wala pa ang mga resulta ng eleksyon.';
 // statistics
 $lang['halalan_gate_statistics_title'] = 'Statistics';
+// ballots
+$lang['halalan_gate_ballots_title'] = 'Balota';
 
 // views/gate/voter.php
 $lang['halalan_gate_voter_login_label'] = 'LOGIN';
@@ -63,7 +65,7 @@ $lang['halalan_voter_vote_no_candidates'] = 'Walang mga kandidato.';
 $lang['halalan_voter_vote_no_selected'] = 'Walang napiling kandidato';
 $lang['halalan_voter_vote_not_all_selected'] = 'Hindi lahat ng posisyon ay nabotohan.';
 $lang['halalan_voter_vote_maximum'] = 'Lumagpas ka sa bilang ng maaaring iboto sa isang posisyon.';
-$lang['halalan_voter_vote_abstain_and_others'] = 'Hindi ka maaaring pumili ng kandidato kung napili na ang abstain.';
+$lang['halalan_voter_vote_abstain_and_others'] = 'Hindi na maaaring pumili ng kandidato kung napili na ang abstain.';
 // confirm_vote
 $lang['halalan_voter_confirm_vote_title'] = 'Pagkumpirma';
 // do_confirm_vote
