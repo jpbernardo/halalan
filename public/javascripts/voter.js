@@ -1,6 +1,21 @@
 
 /* jQuery event handlers */
 
+var set_language = 'english';
+
+var language = [];
+language['english'] = [];
+language['english']['abstain'] = 'By selecting abstain, you\'re not voting for any candidate in the position.  If that\'s not the case, then do not select abstain.';
+language['english']['max_votes'] = "You have already selected the maximum\nnumber of candidates for this position.";
+language['english']['abstain2'] = 'You are abstaining for this POSITION, thus any votes for this position will not be considered. If you are voting for less than the required number for this position, that is perfectly fine and you need not abstain.';
+language['english']['logout'] = "Your ballot has NOT been recorded yet.\nAre you sure you want to logout?";
+
+language['filipino'] = [];
+language['filipino']['abstain'] = 'Sa pagpili ng "Abstain", pinipili mong huwag bumoto para sa alinmang kandidato sa posisyong ito. Kung hindi ito ang iyong nais, huwag piliin ang "Abstain".';
+language['filipino']['max_votes'] = "Ang iyong napili ay lampas na sa bilang ng maaaring iboto sa posisyon na ito.";
+language['filipino']['abstain2'] = 'Pinili mong mag-Abstain para sa posisyong ito. Dahil dito, walang botong itatala para sa posisyong ito. Kung nais mong bumoto ng mas kaunti kaysa sa pinahihintulutang bilang ng kandidato, huwag piliin ang "Abstain".';
+language['filipino']['logout'] = "Hindi pa naitatala ang iyong boto.\nSigurado ka bang nais mong mag-log out?";
+
 function abstainPosition(target, clicked) {
 	var tr = $(target).parents('tr');
 
@@ -11,7 +26,7 @@ function abstainPosition(target, clicked) {
 	var abstain = $.cookie('halalan_abstain');
 
 	if (target.checked && clicked && abstain == null) {
-		alert('By selecting abstain, you\'re not voting for any candidate in the position.  If that\'s not the case, then do not select abstain.');
+		alert(language[set_language]['abstain']);
 		$.cookie('halalan_abstain', 1, {'path':'/'});
 	}
 }
@@ -30,7 +45,7 @@ function checkNumber(target) {
 
 	if (selected >= limit) {
 		target.checked = false;
-		alert("You have already selected the maximum\nnumber of candidates for this position.");
+		alert(language[set_language]['max_votes']);
 	} else {
 		tr.toggleClass('selected', target.checked);
 	}
@@ -58,7 +73,7 @@ function abstainPosition2(target, clicked) {
 	tr.siblings().add(tr2).has('input:checked').toggleClass('selected', !target.checked);
 
 	if (target.checked && clicked) {
-		alert('You are abstaining for this POSITION, thus any votes for this position will not be considered. If you are voting for less than the required number for this position, that is perfectly fine and you need not abstain.');
+		alert(language[set_language]['abstain2']);
 	}
 }
 
@@ -77,7 +92,7 @@ function checkNumber2(target) {
 
 	if (selected >= limit) {
 		target.checked = false;
-		alert("You have already selected the maximum\nnumber of candidates for this position.");
+		alert(language[set_language]['max_votes']);
 	} else {
 		tr.toggleClass('selected', target.checked);
 	}
@@ -108,7 +123,7 @@ function downloadVotes() {
 function confirmLogout() {
 	var page = window.location.href.split('/').pop();
 	if ('vote' == page || 'verify' == page) {
-		return confirm("Your ballot has NOT been recorded yet.\nAre you sure you want to logout?");
+		return confirm(language[set_language]['logout']);
 	}
 }
 
