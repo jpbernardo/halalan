@@ -85,7 +85,7 @@ class Voter extends CI_Controller {
 				$candidates = $this->Candidate->select_all_by_election_id_and_position_id($election['id'], $position['id']);
 				foreach ($candidates as $key3 => $candidate)
 				{
-					$candidates[$key3]['party'] = $this->Party->select($candidate['party_id']);
+					$candidates[$key3]['party'] = isset($candidate['party_id']) ? $this->Party->select($candidate['party_id']) : null;
 				}
 				$positions[$key2]['candidates'] = $candidates;
 				if ( ! empty($candidates))
@@ -212,7 +212,7 @@ class Voter extends CI_Controller {
 				$candidates = $this->Candidate->select_all_by_election_id_and_position_id($election['id'], $position['id']);
 				foreach ($candidates as $key3 => $candidate)
 				{
-					$candidates[$key3]['party'] = $this->Party->select($candidate['party_id']);
+					$candidates[$key3]['party'] = isset($candidate['party_id']) ? $this->Party->select($candidate['party_id']) : null;
 				}
 				$positions[$key2]['candidates'] = $candidates;
 			}
@@ -440,7 +440,7 @@ class Voter extends CI_Controller {
 						$candidates[$key3]['voted'] = FALSE;
 						$count++;
 					}
-					$candidates[$key3]['party'] = $this->Party->select($candidate['party_id']);
+					$candidates[$key3]['party'] = isset($candidate['party_id']) ? $this->Party->select($candidate['party_id']) : null;
 				}
 				if ($count == count($candidates))
 				{
@@ -595,7 +595,7 @@ class Voter extends CI_Controller {
 						$candidates[$key3]['voted'] = FALSE;
 						$count++;
 					}
-					$candidates[$key3]['party'] = $this->Party->select($candidate['party_id']);
+					$candidates[$key3]['party'] = isset($candidate['party_id']) ? $this->Party->select($candidate['party_id']) : null;
 				}
 				if ($count == count($candidates))
 				{
@@ -686,7 +686,7 @@ class Voter extends CI_Controller {
 							$name .= ' "' . $candidate['alias'] . '"';
 						}
 						$name .= ' ' . $candidate['last_name'];
-						$party = $this->Party->select($candidate['party_id']);
+						$party = isset($candidate['party_id']) ? $this->Party->select($candidate['party_id']) : null;
 						if ( ! empty($party))
 						{
 							$name .= ', ';
@@ -768,7 +768,9 @@ class Voter extends CI_Controller {
 			imagettftext($im, 5, 0, 10, $img_height - 10, $text_color, $font, 'Generated on ' . date('Y-m-d H:i:s'));
 			imagerectangle($im, 0, 0, $img_width-1, $img_height-1, $border_color);
 			$path = $this->settings['image_trail_path'] . $election_id . '/';
-			mkdir($path);
+			if(!is_dir($path)){
+				mkdir($path);
+			}
 			$name = $election_id . '_' . $this->voter['id'] . '.png';
 			imagepng($im, $path . $name);
 			imagedestroy($im);

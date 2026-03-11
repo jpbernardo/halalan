@@ -38,7 +38,7 @@ class Logs extends CI_Controller {
 	function index()
 	{
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
 		if($u == 1) {
 		$this->load->model('logs_model');
 		$data['logs'] = $this->logs_model->get_logs();

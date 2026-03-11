@@ -38,7 +38,7 @@ class Elections extends CI_Controller {
 	function index()
 	{
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
 		if($u == 1) {
 		$data['elections'] = $this->Election->select_all_by_level();
 		$admin['username'] = $this->admin['username'];
@@ -62,7 +62,7 @@ class Elections extends CI_Controller {
 	function edit($id)
 	{
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
 		if($u == 1 || $u == $id)
 		{
 			$this->_election('edit', $id);
@@ -104,7 +104,7 @@ class Elections extends CI_Controller {
 	function options($case, $id)
 	{
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
 		if ($case == 'status' || $case == 'results')
 		{
 			$election = $this->Election->select($id);

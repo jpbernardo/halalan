@@ -53,7 +53,7 @@ class Candidates extends CI_Controller {
 			}
 		}
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
 		if($u == 1) {
 		$data['election_id'] = $election_id;
 		$data['position_id'] = $position_id;
@@ -212,7 +212,7 @@ class Candidates extends CI_Controller {
 			}
 		}
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
 		if($u == 1) {
 		$data['elections'] = $this->Election->select_all();
 		$data['positions'] = array();
@@ -319,7 +319,9 @@ class Candidates extends CI_Controller {
 			if ($candidate = $this->session->userdata('candidate')) // edit
 			{
 				// delete old logo first
-				unlink($config['upload_path'] . $candidate['picture']);
+				if(isset($candidate['picture'])){
+					unlink($config['upload_path'] . $candidate['picture']);
+				}
 			}
 			if ( ! $this->upload->do_upload('picture'))
 			{

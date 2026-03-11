@@ -48,8 +48,8 @@ class Home extends CI_Controller {
 	function do_regenerate()
 	{
 		$uadmin = $this->session->userdata('admin');
-        $u = $uadmin['electionid'];
-        $uname = $uadmin['username'];
+        $u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
+        $uname = isset($uadmin['username']) ? $uadmin['username'] : '';
         $error = array();
 		if ( ! $this->input->post('username'))
 		{

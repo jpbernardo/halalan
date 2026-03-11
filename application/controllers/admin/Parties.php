@@ -39,7 +39,7 @@ class Parties extends CI_Controller {
 	{
 		$election_id = get_cookie('selected_election');
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
 		if($u == 1) {
 		$data['election_id'] = $election_id;
 		$data['elections'] = $this->Election->select_all();
@@ -156,7 +156,7 @@ class Parties extends CI_Controller {
 			}
 		}
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
 		if($u == 1) {
 		$data['elections'] = $this->Election->select_all();
 		$data['action'] = $case;

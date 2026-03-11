@@ -40,7 +40,7 @@ class Voters extends CI_Controller {
 		$block_id = get_cookie('selected_block');
 		$data['block_id'] = $block_id;
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
 		if($u == 1) {
 		$data['blocks'] = $this->Block->select_all();
 		}
@@ -144,7 +144,7 @@ class Voters extends CI_Controller {
 			}
 		}
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
 		if($u == 1) {
 		$data['blocks'] = $this->Block->select_all();
 		}
@@ -230,7 +230,7 @@ class Voters extends CI_Controller {
 			$this->session->unset_userdata('csv_upload_data');
 		}
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
 		if($u == 1) {
 		$data['blocks'] = $this->Block->select_all();
 		}
@@ -285,7 +285,7 @@ class Voters extends CI_Controller {
 			force_download('voters.csv', $data);
 		}
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
 		if($u == 1) {
 		$data['blocks'] = $this->Block->select_all();
 		}
@@ -302,8 +302,8 @@ class Voters extends CI_Controller {
 	function generate()
 	{
 		$uadmin = $this->session->userdata('admin');
-		$u = $uadmin['electionid'];
-        $uname = $uadmin['username'];
+		$u = isset($uadmin['electionid']) ? $uadmin['electionid'] : 1;
+        $uname = isset($uadmin['username']) ? $uadmin['username'] : '';
         $this->form_validation->set_rules('block_id', e('admin_export_block'), 'required');
 		if ($this->form_validation->run())
 		{

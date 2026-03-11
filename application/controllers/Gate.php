@@ -120,7 +120,7 @@ class Gate extends CI_Controller {
         
         if ($voter = $this->Boter->authenticated($email))
 		{
-			if (strtotime($voter['login']) > strtotime($voter['logout']))
+			if (isset($voter['login']) && isset($voter['logout']) && strtotime($voter['login']) > strtotime($voter['logout']))
 			{
 				$messages = array('negative', e('gate_voter_currently_logged_in'));
 				$this->session->set_flashdata('messages', $messages);
@@ -160,7 +160,7 @@ class Gate extends CI_Controller {
 		}
 		if ($voter = $this->Boter->authenticate($username, $password))
 		{
-			if (strtotime($voter['login']) > strtotime($voter['logout']))
+			if (isset($voter['login']) && isset($voter['logout']) && strtotime($voter['login']) > strtotime($voter['logout']))
 			{
 				$messages = array('negative', e('gate_voter_currently_logged_in'));
 				$this->session->set_flashdata('messages', $messages);
@@ -264,7 +264,7 @@ class Gate extends CI_Controller {
 				{
 					$candidate = $this->Candidate->select($vote['candidate_id']);
 					$candidate['votes'] = $vote['votes'];
-					$candidate['party'] = $this->Party->select($candidate['party_id']);
+					$candidate['party'] = isset($candidate['party_id']) ? $this->Party->select($candidate['party_id']) : null;
 					$candidate['breakdown'] = $this->Vote->breakdown($election['id'], $candidate['id']);
 					$candidates[] = $candidate;
 				}
@@ -360,8 +360,10 @@ class Gate extends CI_Controller {
 				$usc_parties = $this->Candidate->select_parties_by_election_id_and_position_id(USC_ID, $usc_position['id']);
 				foreach ($usc_parties as $key2 => $usc_party)
 				{
-					$usc_candidates = $this->Candidate->select_all_by_election_id_and_position_id_and_party_id(USC_ID, $usc_position['id'], $usc_party['id']);
-					$usc_parties[$key2]['candidates'] = $usc_candidates;
+					if ($usc_party && isset($usc_party['id'])) {
+						$usc_candidates = $this->Candidate->select_all_by_election_id_and_position_id_and_party_id(USC_ID, $usc_position['id'], $usc_party['id']);
+						$usc_parties[$key2]['candidates'] = $usc_candidates;
+					}
 				}
 				$usc_positions[$key1]['parties'] = $usc_parties;
 			}
