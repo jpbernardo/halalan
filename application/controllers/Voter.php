@@ -270,6 +270,9 @@ class Voter extends CI_Controller {
 		{
 			$this->form_validation->set_rules('captcha', 'Captcha', 'required|alpha_numeric|exact_length['.$this->settings["captcha_length"].']');	
 		}
+		else{
+			$this->form_validation->set_rules('captcha', 'Captcha','min_length[0]');
+		}
 
 		if ($this->form_validation->run())
 		{
